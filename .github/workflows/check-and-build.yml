@@ -142,20 +142,21 @@ jobs:
           [System.IO.File]::WriteAllText("$PWD\aseprite.iss", $iss, $enc)
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" aseprite.iss
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ steps.meta.outputs.ASE_VER }}
-          name: Aseprite ${{ steps.meta.outputs.ASE_VER }}
-          body_path: changelog.md
-          files: installer/aseprite-setup.exe
+          name: aseprite-${{ steps.meta.outputs.ASE_VER }}
+          path: installer/aseprite-setup.exe
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Ready
         shell: pwsh
         run: |
           $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
           $d.latest.build_status = "ready"
-          $d.latest.download_url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.meta.outputs.ASE_VER }}/aseprite-setup.exe"
+          $d.latest.download_url = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          $d.latest.artifact = "aseprite-${{ steps.meta.outputs.ASE_VER }}"
           $d.latest.built_at = (Get-Date).ToUniversalTime().ToString("o")
           $json = $d | ConvertTo-Json -Depth 10
           $enc = New-Object System.Text.UTF8Encoding $false

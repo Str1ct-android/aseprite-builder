@@ -98,15 +98,22 @@
     $("latestStatus").className = "badge "+cls;
     $("latestStatus").textContent = txt;
 
-    var dl = $("downloadBtn"), hint = $("downloadHint");
+    var dl = $("downloadBtn"), hint = $("downloadHint"), note = $("downloadNote");
     if(l && l.download_url){
       dl.href = l.download_url; dl.classList.remove("hidden");
       dl.setAttribute("data-ver", l.version);
       hint.classList.add("hidden");
+      if(l.download_url.indexOf("/actions/runs/") !== -1){
+        note.textContent = "private artifact · GitHub login required";
+        note.classList.remove("hidden");
+      } else {
+        note.classList.add("hidden");
+      }
     } else {
       dl.removeAttribute("href"); dl.classList.add("hidden");
       hint.classList.remove("hidden");
       hint.textContent = l ? "build not ready — run build" : "no build yet";
+      note.classList.add("hidden");
     }
   }
 
