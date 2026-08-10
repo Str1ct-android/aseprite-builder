@@ -68,10 +68,25 @@ jobs:
           New-Item -ItemType Directory -Force aseprite | Out-Null
           Move-Item "$root\*" aseprite -Force
 
-      - name: Skia
+      - name: Skia tag
+        id: skiaver
         shell: pwsh
         run: |
-          iwr -Uri "https://github.com/aseprite/skia/releases/latest/download/Skia-Windows-Release-x64.zip" -OutFile skia.zip
+          $r = (iwr -UseBasicParsing -Headers @{'User-Agent'='aseprite-builder'} https://api.github.com/repos/aseprite/skia/releases/latest).Content | ConvertFrom-Json
+          "tag=$($r.tag_name)" >> $env:GITHUB_OUTPUT
+
+      - name: Cache Skia
+        id: skia_cache
+        uses: actions/cache@v4
+        with:
+          path: skia
+          key: skia-${{ steps.skiaver.outputs.tag }}-win-x64
+
+      - name: Skia
+        if: steps.skia_cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          iwr -Uri "https://github.com/aseprite/skia/releases/download/${{ steps.skiaver.outputs.tag }}/Skia-Windows-Release-x64.zip" -OutFile skia.zip
           New-Item -ItemType Directory -Force skia | Out-Null
           7z x skia.zip -oskia -y
 
@@ -167,6 +182,24 @@ jobs:
         with:
           commit_message: "data: ready ${{ steps.meta.outputs.ASE_VER }}"
           file_pattern: docs/data.json
+
+      - name: Notify Telegram
+        if: success() && env.TG_BOT_TOKEN != '' && env.TG_CHAT_ID != ''
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        shell: pwsh
+        run: |
+          $ver = "${{ steps.meta.outputs.ASE_VER }}"
+          $run  = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          $msg  = "Aseprite $ver build ready.`n`nInstaller (private artifact):`n$run`n`nSite: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          $body = @{ chat_id = $env:TG_CHAT_ID; text = $msg; disable_web_page_preview = "true" } | ConvertTo-Json
+          try {
+            iwr -UseBasicParsing -Method Post -Uri "https://api.telegram.org/bot$env:TG_BOT_TOKEN/sendMessage" -ContentType "application/json" -Body $body | Out-Null
+            Write-Host "telegram: sent"
+          } catch {
+            Write-Host "telegram: failed - $($_.Exception.Message)"
+          }
 
       - name: Failed
         if: failure()

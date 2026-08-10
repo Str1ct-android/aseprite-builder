@@ -3,7 +3,7 @@
   var CFG = window.ASEBUILDER_CONFIG;
   var INSTALLED_KEY = "asebuilder_installed";
   var REL_CACHE_KEY = "asebuilder_releases_cache";
-  var state = { data: null, liveTag: null, releases: [], viewVersion: null };
+  var state = { data: null, liveTag: null, releases: [], viewVersion: null, releasesFailed: false };
 
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
@@ -160,7 +160,8 @@
     if(!rows.length){
       var hist = (state.data && state.data.history) ? state.data.history.slice() : [];
       if(!hist.length){
-        body.innerHTML = '<tr><td colspan="4" class="empty">loading releases…</td></tr>';
+        var msg = state.releasesFailed ? "GitHub API rate-limited — retry later" : "loading releases…";
+        body.innerHTML = '<tr><td colspan="4" class="empty">'+msg+'</td></tr>';
         return;
       }
       rows = hist;
@@ -269,7 +270,7 @@
         writeRelCache(state.releases);
         render();
       })
-      .catch(function(){ render(); });
+      .catch(function(){ state.releasesFailed = true; render(); });
   }
 
   function checkNow(){
@@ -296,9 +297,15 @@
         }
       })
       .catch(function(e){
-        var built = (state.data && state.data.latest) ? state.data.latest.version : "";
-        if(built){ alert("ok", "offline — last built "+built); }
-        else { alert("bad", "CHECK FAILED — "+e.message); }
+        var official = officialVer();
+        var installed = getInstalled();
+        if(official && installed && installed !== official){
+          alert("warn", "RATE-LIMITED (last sync) — "+installed+" → "+official);
+        } else if(official){
+          alert("info", "RATE-LIMITED (last sync) — latest known "+official);
+        } else {
+          alert("bad", "CHECK FAILED — "+e.message);
+        }
       })
       .finally(function(){
         btn.removeAttribute("disabled"); btn.textContent = "CHECK NOW";
