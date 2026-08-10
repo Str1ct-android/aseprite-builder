@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aseprite Builder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%23161'/%3E%3Crect x='2' y='2' width='3' height='3' fill='%23e55'/%3E%3Crect x='6' y='2' width='3' height='3' fill='%23ecd83a'/%3E%3Crect x='10' y='2' width='3' height='3' fill='%237adf64'/%3E%3Crect x='2' y='6' width='3' height='3' fill='%235fb0ea'/%3E%3Crect x='6' y='6' width='3' height='3' fill='%23d56ad0'/%3E%3Crect x='10' y='6' width='3' height='3' fill='%23ed8a3a'/%3E%3Crect x='4' y='10' width='8' height='3' fill='%23d7d7dd'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="scanlines"></div>
+
+<header class="topbar">
+  <div class="logo" aria-label="Aseprite Builder">
+    <span class="word">
+      <span class="c">A</span><span class="c">S</span><span class="c">E</span><span class="c">P</span><span class="c">R</span><span class="c">I</span><span class="c">T</span><span class="c">E</span>
+    </span>
+    <span class="word builder">BUILDER</span>
+  </div>
+
+  <div class="topbar-actions">
+    <button id="checkBtn" class="btn btn-primary">CHECK NOW</button>
+    <a id="runBuildLink" class="btn btn-ghost" target="_blank" rel="noopener">RUN BUILD</a>
+    <a id="upstreamLink" class="btn btn-ghost" target="_blank" rel="noopener">ASEPRITE ↗</a>
+  </div>
+</header>
+
+<div id="alert" class="alert hidden"></div>
+
+<main class="wrap">
+
+  <section class="panel myversion">
+    <h2 class="panel-title">MY VERSION</h2>
+    <div class="mv-grid">
+      <div class="mv-cell">
+        <span class="mv-label">INSTALLED</span>
+        <span id="installedVer" class="mv-value mono">—</span>
+      </div>
+      <div class="mv-cell">
+        <span class="mv-label">OFFICIAL</span>
+        <span id="upstreamVer" class="mv-value mono">…</span>
+      </div>
+      <div class="mv-cell">
+        <span class="mv-label">BUILT</span>
+        <span id="builtVer" class="mv-value mono">…</span>
+      </div>
+      <div class="mv-cell">
+        <span class="mv-label">STATUS</span>
+        <span id="mvStatus" class="badge badge-idle">—</span>
+      </div>
+    </div>
+    <div class="mv-set">
+      <label for="setInstalled" class="mv-label">SET INSTALLED:</label>
+      <select id="setInstalled" class="select"></select>
+      <button id="clearInstalled" class="btn btn-mini">CLEAR</button>
+    </div>
+    <div class="mv-note" id="mvNote"></div>
+  </section>
+
+  <section class="panel latest">
+    <div class="latest-head">
+      <h2 class="panel-title">LATEST BUILD</h2>
+      <span id="latestStatus" class="badge">…</span>
+    </div>
+    <div class="latest-meta">
+      <span id="latestVer" class="mono big">—</span>
+      <span id="latestDate" class="dim mono"></span>
+    </div>
+    <div class="latest-actions">
+      <a id="downloadBtn" class="btn btn-go" target="_blank" rel="noopener">DOWNLOAD .EXE</a>
+      <span id="downloadHint" class="dim mono hidden">no installer yet</span>
+    </div>
+  </section>
+
+  <section class="panel changelog">
+    <div class="cl-head">
+      <h2 class="panel-title">CHANGELOG</h2>
+      <span id="clVer" class="dim mono"></span>
+      <button id="clLatest" class="btn btn-mini hidden">← LATEST</button>
+    </div>
+    <div id="changelog" class="cl-body mono"></div>
+  </section>
+
+  <section class="panel history">
+    <h2 class="panel-title">HISTORY</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>VERSION</th><th>RELEASED</th><th>STATUS</th><th>ACTIONS</th></tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span class="dim mono">tracked: <a id="trackedRepo" target="_blank" rel="noopener"></a></span>
+  <span class="dim mono">last checked: <span id="lastChecked">never</span></span>
+  <span class="dim mono">auto-check: every 6h</span>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

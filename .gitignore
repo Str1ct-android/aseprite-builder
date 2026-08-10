@@ -1,0 +1,12 @@
+workspace/
+build/
+skia/
+aseprite/
+installer/*.exe
+installer/*.iss
+*.zip
+__pycache__/
+*.pyc
+changelog.md
+.DS_Store
+Thumbs.db

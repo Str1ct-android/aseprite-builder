@@ -1,0 +1,185 @@
+name: Check & Build Aseprite
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: check-build
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      build_needed: ${{ steps.detect.outputs.build_needed }}
+      version: ${{ steps.detect.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check upstream
+        id: detect
+        run: python scripts/check-update.py
+
+      - name: Commit tracker
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: refresh (${{ steps.detect.outputs.version }})"
+          file_pattern: docs/data.json
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.build_needed == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Meta
+        id: meta
+        shell: pwsh
+        run: |
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          $l = $d.latest
+          "ASE_VER=$($l.version)" >> $env:GITHUB_OUTPUT
+          "SOURCE_URL=$($l.source_url)" >> $env:GITHUB_OUTPUT
+          $enc = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("$PWD\changelog.md", $l.changelog, $enc)
+
+      - name: Long paths
+        run: git config --system core.longpaths true
+
+      - name: Tools
+        run: choco install cmake ninja innosetup -y --no-progress
+
+      - name: Source
+        shell: pwsh
+        run: |
+          iwr -Uri "${{ steps.meta.outputs.SOURCE_URL }}" -OutFile src.zip
+          7z x src.zip -otmp -y
+          $root = (Get-ChildItem tmp -Filter CMakeLists.txt -Recurse | Select-Object -First 1).Directory.FullName
+          New-Item -ItemType Directory -Force aseprite | Out-Null
+          Move-Item "$root\*" aseprite -Force
+
+      - name: Skia
+        shell: pwsh
+        run: |
+          iwr -Uri "https://github.com/aseprite/skia/releases/latest/download/Skia-Windows-Release-x64.zip" -OutFile skia.zip
+          New-Item -ItemType Directory -Force skia | Out-Null
+          7z x skia.zip -oskia -y
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          $src = Join-Path $env:GITHUB_WORKSPACE aseprite
+          $skia = Join-Path $env:GITHUB_WORKSPACE skia
+          New-Item -ItemType Directory -Force build | Out-Null
+          Set-Location build
+          cmake -G Ninja `
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DLAF_BACKEND=skia `
+            -DSKIA_DIR="$skia" `
+            -DSKIA_LIBRARY_DIR="$skia\out\Release-x64" `
+            -DSKIA_LIBRARY="$skia\out\Release-x64\skia.lib" `
+            -DENABLE_UPDATER=OFF `
+            -DENABLE_TESTS=OFF `
+            "$src"
+
+      - name: Compile
+        run: |
+          cd build
+          ninja -j 2
+
+      - name: Runtime DLLs
+        shell: pwsh
+        run: |
+          $bin = Join-Path $env:GITHUB_WORKSPACE build\bin
+          $ssl = "C:\Program Files\OpenSSL\bin"
+          if (Test-Path $ssl) {
+            Copy-Item "$ssl\libcrypto-3-x64.dll","$ssl\libssl-3-x64.dll" -Destination $bin -Force -ErrorAction SilentlyContinue
+          }
+          $f = Get-ChildItem "C:\Program Files" -Recurse -Filter libcrypto-3-x64.dll -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($f) { Copy-Item $f.FullName "$bin\libcrypto-3-x64.dll" -Force }
+          $f2 = Get-ChildItem "C:\Program Files" -Recurse -Filter libssl-3-x64.dll -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($f2) { Copy-Item $f2.FullName "$bin\libssl-3-x64.dll" -Force }
+
+      - name: Installer
+        shell: pwsh
+        run: |
+          $bin = Join-Path $env:GITHUB_WORKSPACE build\bin
+          $ver = "${{ steps.meta.outputs.ASE_VER }}"
+          $iss = @"
+          [Setup]
+          AppName=Aseprite
+          AppVersion=$ver
+          DefaultDirName={autopf}\Aseprite
+          DefaultGroupName=Aseprite
+          OutputBaseFilename=aseprite-setup
+          OutputDir=installer
+          Compression=lzma
+          SolidCompression=yes
+          ArchitecturesAllowed=x64
+          ArchitecturesInstallIn64BitMode=x64
+          [Tasks]
+          Name: "desktopicon"; Description: "Desktop icon"; GroupDescription: "Shortcuts:"
+          [Files]
+          Source: "$bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+          [Icons]
+          Name: "{group}\Aseprite"; Filename: "{app}\aseprite.exe"
+          Name: "{commondesktop}\Aseprite"; Filename: "{app}\aseprite.exe"; Tasks: desktopicon
+          "@
+          New-Item -ItemType Directory -Force installer | Out-Null
+          $enc = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("$PWD\aseprite.iss", $iss, $enc)
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" aseprite.iss
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.ASE_VER }}
+          name: Aseprite ${{ steps.meta.outputs.ASE_VER }}
+          body_path: changelog.md
+          files: installer/aseprite-setup.exe
+
+      - name: Ready
+        shell: pwsh
+        run: |
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          $d.latest.build_status = "ready"
+          $d.latest.download_url = "https://github.com/${{ github.repository }}/releases/download/${{ steps.meta.outputs.ASE_VER }}/aseprite-setup.exe"
+          $d.latest.built_at = (Get-Date).ToUniversalTime().ToString("o")
+          $json = $d | ConvertTo-Json -Depth 10
+          $enc = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
+
+      - name: Commit status
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: ready ${{ steps.meta.outputs.ASE_VER }}"
+          file_pattern: docs/data.json
+
+      - name: Failed
+        if: failure()
+        shell: pwsh
+        run: |
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          $d.latest.build_status = "failed"
+          $json = $d | ConvertTo-Json -Depth 10
+          $enc = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
+
+      - name: Commit fail
+        if: failure()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "data: build failed ${{ steps.meta.outputs.ASE_VER }}"
+          file_pattern: docs/data.json
