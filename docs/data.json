@@ -6,7 +6,7 @@
     "published_at": "2026-07-23T21:23:49Z",
     "source_url": "https://github.com/aseprite/aseprite/releases/download/v1.3.18.1/Aseprite-v1.3.18.1-Source.zip",
     "changelog": "## What's Changed\r\n* Set the GIF version to 89a when exporting > 1 frame by @s0ph0s-dog in https://github.com/aseprite/aseprite/pull/5942\r\n* Fixed crash switching between sprites when the mouse is on a timeline tag [#5941](https://github.com/aseprite/aseprite/issues/5941)\r\n* Fixed crash saving backup data [#5939](https://github.com/aseprite/aseprite/issues/5939)\r\n* Fixed crash using theme without layout selector icon [#5582](https://github.com/aseprite/aseprite/issues/5582)\r\n\r\n## New Contributors\r\n* @s0ph0s-dog made their first contribution in https://github.com/aseprite/aseprite/pull/5942\r\n\r\n**Full Changelog**: https://github.com/aseprite/aseprite/compare/v1.3.18...v1.3.18.1",
-    "build_status": "pending",
+    "build_status": "failed",
     "download_url": "",
     "detected_at": "2026-08-10"
   },
