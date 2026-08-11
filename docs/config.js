@@ -10,3 +10,6 @@ window.ASEBUILDER_LINKS = {
   upstreamReleases: () => `https://github.com/${ASEBUILDER_CONFIG.UPSTREAM}/releases`,
   pages: () => `https://${ASEBUILDER_CONFIG.OWNER.toLowerCase()}.github.io/${ASEBUILDER_CONFIG.REPO}/`,
 };
+
+Object.freeze(window.ASEBUILDER_CONFIG);
+Object.freeze(window.ASEBUILDER_LINKS);

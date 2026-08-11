@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; connect-src 'self' api.github.com; base-uri 'self'; form-action 'self'">
 <title>Aseprite Builder</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%23161'/%3E%3Crect x='2' y='2' width='3' height='3' fill='%23e55'/%3E%3Crect x='6' y='2' width='3' height='3' fill='%23ecd83a'/%3E%3Crect x='10' y='2' width='3' height='3' fill='%237adf64'/%3E%3Crect x='2' y='6' width='3' height='3' fill='%235fb0ea'/%3E%3Crect x='6' y='6' width='3' height='3' fill='%23d56ad0'/%3E%3Crect x='10' y='6' width='3' height='3' fill='%23ed8a3a'/%3E%3Crect x='4' y='10' width='8' height='3' fill='%23d7d7dd'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,8 +25,8 @@
 
   <div class="topbar-actions">
     <button id="checkBtn" class="btn btn-primary">CHECK NOW</button>
-    <a id="runBuildLink" class="btn btn-ghost" target="_blank" rel="noopener">RUN BUILD</a>
-    <a id="upstreamLink" class="btn btn-ghost" target="_blank" rel="noopener">ASEPRITE ↗</a>
+    <a id="runBuildLink" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">RUN BUILD</a>
+    <a id="upstreamLink" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">ASEPRITE ↗</a>
   </div>
 </header>
 
@@ -70,7 +72,7 @@
       <span id="latestDate" class="dim mono"></span>
     </div>
     <div class="latest-actions">
-      <a id="downloadBtn" class="btn btn-go" target="_blank" rel="noopener">DOWNLOAD .EXE</a>
+      <a id="downloadBtn" class="btn btn-go" target="_blank" rel="noopener noreferrer">DOWNLOAD .EXE</a>
       <span id="downloadNote" class="dim mono hidden"></span>
       <span id="downloadHint" class="dim mono hidden">no installer yet</span>
     </div>

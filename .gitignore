@@ -10,3 +10,6 @@ __pycache__/
 changelog.md
 .DS_Store
 Thumbs.db
+
+# session artifacts
+.zcode/

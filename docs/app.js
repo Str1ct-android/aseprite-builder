@@ -8,6 +8,14 @@
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function safeUrl(u){ return /^https?:\/\//.test(String(u||"")) ? u : ""; }
+  function fetchT(url, opts, ms){
+    opts = opts || {};
+    var c = new AbortController();
+    var t = setTimeout(function(){ c.abort(); }, ms || 9000);
+    opts.signal = c.signal;
+    return fetch(url, opts).finally(function(){ clearTimeout(t); });
+  }
 
   function getInstalled(){ return localStorage.getItem(INSTALLED_KEY) || ""; }
   function setInstalled(v){
@@ -47,8 +55,8 @@
     closeUl();
     var out = html.join("\n");
     out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
-    out = out.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-    out = out.replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    out = out.replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    out = out.replace(/(https?:\/\/[^\s<)]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
     return out;
   }
 
@@ -84,7 +92,8 @@
     var cur = getInstalled();
     var opts = '<option value="">— not set —</option>';
     allVersions().forEach(function(v){
-      opts += '<option value="'+v+'"'+(v===cur?" selected":"")+">"+v+"</option>";
+      var ev = esc(v);
+      opts += '<option value="'+ev+'"'+(v===cur?" selected":"")+">"+ev+"</option>";
     });
     sel.innerHTML = opts;
   }
@@ -99,11 +108,12 @@
     $("latestStatus").textContent = txt;
 
     var dl = $("downloadBtn"), hint = $("downloadHint"), note = $("downloadNote");
-    if(l && l.download_url){
-      dl.href = l.download_url; dl.classList.remove("hidden");
+    var dlurl = l && l.download_url ? safeUrl(l.download_url) : "";
+    if(l && dlurl){
+      dl.href = dlurl; dl.classList.remove("hidden");
       dl.setAttribute("data-ver", l.version);
       hint.classList.add("hidden");
-      if(l.download_url.indexOf("/actions/runs/") !== -1){
+      if(dlurl.indexOf("/actions/runs/") !== -1){
         note.textContent = "private artifact · GitHub login required";
         note.classList.remove("hidden");
       } else {
@@ -173,7 +183,7 @@
       var stHtml, act;
       if(b && b.url){
         stHtml = statusBadge(b.status);
-        act = '<a class="btn btn-mini btn-go" href="'+b.url+'" target="_blank" rel="noopener" data-ver="'+ver+'">DOWNLOAD</a>';
+        act = '<a class="btn btn-mini btn-go" href="'+safeUrl(b.url)+'" target="_blank" rel="noopener noreferrer" data-ver="'+esc(ver)+'">DOWNLOAD</a>';
       } else if(b){
         stHtml = statusBadge(b.status);
         act = '<span class="dim">—</span>';
@@ -183,7 +193,7 @@
       }
       act += '<button class="btn btn-mini" data-set="'+ver+'">SET MINE</button>';
       var pre = r.prerelease ? ' <span class="badge badge-idle">PRE</span>' : '';
-      var verBtn = '<button class="ver-btn" data-log="'+ver+'">'+ver+'</button>';
+      var verBtn = '<button class="ver-btn" data-log="'+esc(ver)+'">'+esc(ver)+'</button>';
       return '<tr><td class="mono">'+verBtn+pre+'</td>'+
         '<td class="mono dim">'+fmtDate(pub)+'</td>'+
         '<td>'+stHtml+'</td>'+
@@ -263,7 +273,7 @@
     var cached = readRelCache();
     if(cached){ state.releases = cached; render(); return; }
     var url = "https://api.github.com/repos/"+CFG.UPSTREAM+"/releases?per_page=100";
-    fetch(url, {headers:{"Accept":"application/vnd.github+json"}})
+    fetchT(url, {headers:{"Accept":"application/vnd.github+json"}}, 10000)
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(list){
         state.releases = (list || []).filter(function(r){ return r.tag_name; });
@@ -277,7 +287,7 @@
     var btn = $("checkBtn");
     btn.setAttribute("disabled","disabled"); btn.textContent = "CHECKING…";
     var url = "https://api.github.com/repos/"+CFG.UPSTREAM+"/releases/latest";
-    fetch(url, {headers:{"Accept":"application/vnd.github+json"}})
+    fetchT(url, {headers:{"Accept":"application/vnd.github+json"}}, 10000)
       .then(function(r){
         if(!r.ok) throw new Error("HTTP "+r.status);
         return r.json();
@@ -337,7 +347,7 @@
   });
 
   function load(){
-    fetch("data.json", {cache:"no-store"})
+    fetchT("data.json", {cache:"no-store"}, 9000)
       .then(function(r){ return r.json(); })
       .then(function(d){ state.data = d; render(); fetchReleases(); })
       .catch(function(){
