@@ -34,7 +34,7 @@ jobs:
         run: python scripts/check-update.py
 
       - name: Commit tracker
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "data: refresh (${{ steps.detect.outputs.version }})"
           file_pattern: docs/data.json
@@ -76,7 +76,7 @@ jobs:
           [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
 
       - name: Commit building status
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "data: building ${{ steps.meta.outputs.ASE_VER }}"
           file_pattern: docs/data.json
@@ -241,7 +241,7 @@ jobs:
           [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
 
       - name: Commit status
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "data: ready ${{ steps.meta.outputs.ASE_VER }}"
           file_pattern: docs/data.json
@@ -304,7 +304,7 @@ jobs:
 
       - name: Commit fail
         if: failure()
-        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
           commit_message: "data: build failed ${{ steps.meta.outputs.ASE_VER }}"
           file_pattern: docs/data.json
