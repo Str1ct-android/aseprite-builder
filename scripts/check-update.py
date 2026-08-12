@@ -13,7 +13,7 @@ HISTORY_CAP = 50
 MAX_BYTES = 64 * 1024 * 1024
 
 _repos_re = re.compile(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$")
-_oneline_re = re.compile(r"^[\x20-\x7e]+$")
+_oneline_re = re.compile(r"^[\x20-\x7e]*$")
 
 UPSTREAM = os.environ.get("UPSTREAM_REPO", "aseprite/aseprite")
 if not _repos_re.match(UPSTREAM):

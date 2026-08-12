@@ -1,5 +1,7 @@
 # aseprite-builder
 
+![build](https://github.com/Str1ct-android/aseprite-builder/actions/workflows/check-and-build.yml/badge.svg)
+
 Следит за релизами [aseprite/aseprite](https://github.com/aseprite/aseprite), показывает
 обновления на пиксельном сайте и автоматически собирает Windows-инсталлятор, когда
 выходит новый патч.

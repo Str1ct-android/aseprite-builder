@@ -203,6 +203,10 @@ a:hover{text-decoration:underline}
 /* history table */
 .tbl-wrap{overflow-x:auto;content-visibility:auto;contain-intrinsic-size:0 600px}
 .tbl{width:100%;border-collapse:collapse;font-size:18px;table-layout:fixed}
+.tbl col:nth-child(1){width:22%}
+.tbl col:nth-child(2){width:20%}
+.tbl col:nth-child(3){width:18%}
+.tbl col:nth-child(4){width:40%}
 .tbl th,.tbl td{padding:9px 10px;text-align:left;border:2px solid var(--line);vertical-align:middle}
 .tbl th{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--dim);background:var(--bg2);letter-spacing:1px}
 .tbl tr:nth-child(even) td{background:var(--bg2)}

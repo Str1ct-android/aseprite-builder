@@ -68,13 +68,15 @@ jobs:
       - name: Long paths
         run: git config --system core.longpaths true
 
-      - name: Cache choco tools
+      - name: Cache Inno Setup
+        id: inno_cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          path: C:\ProgramData\chocolatey
-          key: choco-ninja-innosetup-v1
+          path: 'C:\Program Files (x86)\Inno Setup 6'
+          key: innosetup-6-v1
 
       - name: Tools
+        if: steps.inno_cache.outputs.cache-hit != 'true'
         run: choco install ninja innosetup -y --no-progress
 
       - name: Skia tag
@@ -92,12 +94,13 @@ jobs:
         with:
           path: skia
           key: skia-${{ steps.skiaver.outputs.tag }}-win-x64
+          restore-keys: skia-
 
       - name: Skia
         if: steps.skia_cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          iwr -UseBasicParsing -Uri "https://github.com/aseprite/skia/releases/download/${{ steps.skiaver.outputs.tag }}/Skia-Windows-Release-x64.zip" -OutFile skia.zip
+          iwr -UseBasicParsing -Uri "https://github.com/aseprite/skia/releases/download/${{ steps.skiaver.outputs.tag }}/Skia-Windows-Release-x64.zip" -Headers @{'User-Agent'='aseprite-builder'} -OutFile skia.zip
           New-Item -ItemType Directory -Force skia | Out-Null
           7z x skia.zip -oskia -y
 
@@ -108,7 +111,7 @@ jobs:
           SRC: ${{ steps.meta.outputs.SOURCE_URL }}
         shell: pwsh
         run: |
-          iwr -UseBasicParsing -Uri $env:SRC -OutFile src.zip
+          iwr -UseBasicParsing -Uri $env:SRC -Headers @{'User-Agent'='aseprite-builder'} -OutFile src.zip
           7z x src.zip -otmp -y
           $root = (Get-ChildItem tmp -Directory | Select-Object -First 1).FullName
           if (-not (Test-Path "$root\CMakeLists.txt")) { Write-Error "unexpected source layout"; exit 1 }
@@ -176,7 +179,7 @@ jobs:
           [Tasks]
           Name: "desktopicon"; Description: "Desktop icon"; GroupDescription: "Shortcuts:"
           [Files]
-          Source: "$bin\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
+          Source: "$bin\*"; DestDir: "{app}"; Excludes: "*.pdb *.ilk *.exp *.lib *.obj"; Flags: ignoreversion recursesubdirs createallsubdirs
           [Icons]
           Name: "{group}\Aseprite"; Filename: "{app}\aseprite.exe"
           Name: "{commondesktop}\Aseprite"; Filename: "{app}\aseprite.exe"; Tasks: desktopicon
@@ -215,7 +218,7 @@ jobs:
           $d.latest.artifact = "aseprite-$($env:ASE_VER)"
           $d.latest.installer_sha256 = $env:SHA
           $d.latest.built_at = (Get-Date).ToUniversalTime().ToString("o")
-          $json = $d | ConvertTo-Json -Depth 10
+          $json = ($d | ConvertTo-Json -Depth 10) + "`n"
           $enc = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
 
@@ -272,7 +275,7 @@ jobs:
           Set-StrictMode -Off
           $d = Get-Content docs/data.json -Raw | ConvertFrom-Json -AsHashtable
           $d.latest.build_status = "failed"
-          $json = $d | ConvertTo-Json -Depth 10
+          $json = ($d | ConvertTo-Json -Depth 10) + "`n"
           $enc = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
 
