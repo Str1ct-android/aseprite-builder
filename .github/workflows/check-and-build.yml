@@ -113,10 +113,11 @@ jobs:
         run: |
           iwr -UseBasicParsing -Uri $env:SRC -Headers @{'User-Agent'='aseprite-builder'} -OutFile src.zip
           7z x src.zip -otmp -y
-          $root = (Get-ChildItem tmp -Directory | Select-Object -First 1).FullName
-          if (-not (Test-Path "$root\CMakeLists.txt")) { Write-Error "unexpected source layout"; exit 1 }
+          $cm = Get-ChildItem -Path tmp -Filter CMakeLists.txt -Recurse -File | Select-Object -First 1
+          if (-not $cm) { Write-Error "CMakeLists.txt not found in source archive"; exit 1 }
+          $root = $cm.Directory.FullName
           New-Item -ItemType Directory -Force aseprite | Out-Null
-          Move-Item "$root\*" aseprite -Force
+          Move-Item -Path "$root\*" -Destination aseprite -Force
 
       - name: Configure
         shell: pwsh
