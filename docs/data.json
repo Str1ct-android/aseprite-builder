@@ -6,7 +6,7 @@
     "published_at": "2026-08-11T17:42:57Z",
     "source_url": "https://github.com/aseprite/aseprite/releases/download/v1.3.18.2/Aseprite-v1.3.18.2-Source.zip",
     "changelog": "## What's Changed\r\n\r\n* Fixed crash changing keyboard focus in *Edit > Preferences* [#5946](https://github.com/aseprite/aseprite/issues/5946)\r\n* Lua API:\r\n  * Update [API version](https://www.aseprite.org/api/app#appapiversion) to 41\r\n  * New `Dialog:samerow{}` function (thanks to [@lampysprites](https://github.com/aseprite/aseprite/pull/5959)\r\n  * Added `save`/`beforesave` sprite events [#5115](https://github.com/aseprite/aseprite/issues/5115) (thanks to [@MapleGecko](https://github.com/aseprite/aseprite/pull/5945))\r\n  * Prevent uninitialized params in `app.command.MoveMask`/`Scroll`\r\n\r\n## PRs\r\n\r\n* Add checks to message recipient in Preferences focus message (fix #5946) by @ckaiser in https://github.com/aseprite/aseprite/pull/5949\r\n* [lua] Add save/beforesave sprite.events (close #5115) by @MapleGecko in https://github.com/aseprite/aseprite/pull/5945\r\n* [lua] Add `Dialog:samerow` by @lampysprites in https://github.com/aseprite/aseprite/pull/5959\r\n* Fix break position in some switch/case statements by @dacap in https://github.com/aseprite/aseprite/pull/5953\r\n* Prevent uninitialized MoveThings params by @ckaiser in https://github.com/aseprite/aseprite/pull/5910\r\n\r\n**Full Changelog**: https://github.com/aseprite/aseprite/compare/v1.3.18.1...v1.3.18.2",
-    "build_status": "pending",
+    "build_status": "failed",
     "download_url": "",
     "detected_at": "2026-08-11"
   },
