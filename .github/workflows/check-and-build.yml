@@ -65,6 +65,23 @@ jobs:
           $enc = New-Object System.Text.UTF8Encoding $false
           [System.IO.File]::WriteAllText("$PWD\changelog.md", $l.changelog, $enc)
 
+      - name: Mark building
+        shell: pwsh
+        run: |
+          Set-StrictMode -Off
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json -AsHashtable
+          $d.latest.build_status = "building"
+          $json = ($d | ConvertTo-Json -Depth 10) + "`n"
+          $enc = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("$PWD\docs\data.json", $json, $enc)
+
+      - name: Commit building status
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
+        with:
+          commit_message: "data: building ${{ steps.meta.outputs.ASE_VER }}"
+          file_pattern: docs/data.json
+
+
       - name: Long paths
         run: git config --system core.longpaths true
 
@@ -240,7 +257,11 @@ jobs:
         run: |
           Write-Host "::add-mask::$env:TG_BOT_TOKEN"
           $run  = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          $msg  = "Aseprite $env:ASE_VER build ready.`n`nsha256: $env:SHA`nInstaller (private artifact): $run"
+          $cl = ""
+          if (Test-Path changelog.md) { $cl = (Get-Content changelog.md -Raw).Trim() }
+          if ($cl.Length -gt 2500) { $cl = $cl.Substring(0,2500) + "`n... (truncated)" }
+          $msg  = "Aseprite $env:ASE_VER build ready.`n`nsha256: $env:SHA`nInstaller: $run"
+          if ($cl) { $msg += "`n`nChangelog:`n$cl" }
           $body = @{ chat_id = $env:TG_CHAT_ID; text = $msg; disable_web_page_preview = "true" } | ConvertTo-Json
           try {
             $r = iwr -UseBasicParsing -Method Post -Uri "https://api.telegram.org/bot$env:TG_BOT_TOKEN/sendMessage" -ContentType "application/json" -Body $body
@@ -249,6 +270,7 @@ jobs:
             $code = $_.Exception.Response.StatusCode.value__
             Write-Host "telegram: failed HTTP $code"
           }
+
 
       - name: Notify Telegram on failure
         if: failure() && env.TG_BOT_TOKEN != '' && env.TG_CHAT_ID != ''
