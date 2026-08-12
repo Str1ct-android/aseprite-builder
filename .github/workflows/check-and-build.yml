@@ -53,7 +53,8 @@ jobs:
         id: meta
         shell: pwsh
         run: |
-          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          Set-StrictMode -Off
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json -AsHashtable
           $l = $d.latest
           $ver = [string]$l.version
           if ($ver -notmatch '^v?[0-9A-Za-z.\-]+$') { Write-Error "invalid version: $ver"; exit 1 }
@@ -201,7 +202,8 @@ jobs:
           SHA: ${{ steps.hash.outputs.SHA }}
         shell: pwsh
         run: |
-          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          Set-StrictMode -Off
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json -AsHashtable
           $d.latest.build_status = "ready"
           $d.latest.download_url = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           $d.latest.artifact = "aseprite-$($env:ASE_VER)"
@@ -261,7 +263,8 @@ jobs:
         if: failure()
         shell: pwsh
         run: |
-          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json
+          Set-StrictMode -Off
+          $d = Get-Content docs/data.json -Raw | ConvertFrom-Json -AsHashtable
           $d.latest.build_status = "failed"
           $json = $d | ConvertTo-Json -Depth 10
           $enc = New-Object System.Text.UTF8Encoding $false
