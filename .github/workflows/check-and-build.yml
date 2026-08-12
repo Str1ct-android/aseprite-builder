@@ -117,7 +117,7 @@ jobs:
           New-Item -ItemType Directory -Force build | Out-Null
           Set-Location build
           cmake -G Ninja `
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DCMAKE_BUILD_TYPE=Release `
             -DLAF_BACKEND=skia `
             -DSKIA_DIR="$skia" `
             -DSKIA_LIBRARY_DIR="$skia\out\Release-x64" `

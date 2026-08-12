@@ -166,7 +166,7 @@
   function renderHistory(){
     var body = $("historyBody");
     var rows = state.releases.slice();
-    var bmap = builtMap();
+    var bmap = state._bmap || builtMap();
     if(!rows.length){
       var hist = (state.data && state.data.history) ? state.data.history.slice() : [];
       if(!hist.length){
@@ -347,9 +347,9 @@
   });
 
   function load(){
-    fetchT("data.json", {cache:"no-store"}, 9000)
+    fetchT("data.json", {}, 9000)
       .then(function(r){ return r.json(); })
-      .then(function(d){ state.data = d; render(); fetchReleases(); })
+      .then(function(d){ state.data = d; state._bmap = builtMap(); render(); fetchReleases(); })
       .catch(function(){
         state.data = { latest:null, history:[] };
         render();
