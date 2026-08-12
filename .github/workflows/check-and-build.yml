@@ -70,7 +70,7 @@ jobs:
 
       - name: Cache Inno Setup
         id: inno_cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: 'C:\Program Files (x86)\Inno Setup 6'
           key: innosetup-6-v1
@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache Skia
         id: skia_cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: skia
           key: skia-${{ steps.skiaver.outputs.tag }}-win-x64
