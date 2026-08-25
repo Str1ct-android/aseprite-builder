@@ -6,7 +6,7 @@
     "published_at": "2026-08-25T12:30:26Z",
     "source_url": "https://github.com/aseprite/aseprite/releases/download/v1.3.18.3/Aseprite-v1.3.18.3-Source.zip",
     "changelog": "## What's New\r\n* New [crosshair option](https://github.com/aseprite/aseprite/issues/5993#issuecomment-5370331977) to apply UI scaling to the crosshair [#5993](https://github.com/aseprite/aseprite/issues/5993)\r\n* Fixed \"edges\" preview for tiles [#5045](https://github.com/aseprite/aseprite/issues/5045)\r\n* Fixed invisible widgets grabbing focus for key events [#5810](https://github.com/aseprite/aseprite/issues/5810)\r\n* macOS: Fixed application slows over time [#3256](https://github.com/aseprite/aseprite/issues/3256)\r\n* macOS: Fixed brush draws a point instead a stroke after undo [#5974](https://github.com/aseprite/aseprite/issues/5974)\r\n* Linux: Fixed crash using eyedropper outside the main window [#5469](https://github.com/aseprite/aseprite/issues/5469) [#5976](https://github.com/aseprite/aseprite/issues/5976)\r\n* `.aseprite` decoder:\r\n  * Support reading any tileset ID\r\n  * More robust decoding of some kind of chunks to avoid reading more data\r\n    of what it's really available\r\n\r\n## Merged PRs\r\n* Fix invisible widgets grabbing focus for key events by @ckaiser in https://github.com/aseprite/aseprite/pull/5830\r\n\r\n**Full Changelog**: https://github.com/aseprite/aseprite/compare/v1.3.18.2...v1.3.18.3",
-    "build_status": "pending",
+    "build_status": "building",
     "download_url": "",
     "detected_at": "2026-08-25"
   },
