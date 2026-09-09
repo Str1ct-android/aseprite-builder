@@ -6,7 +6,7 @@
     "published_at": "2026-09-09T14:43:31Z",
     "source_url": "https://github.com/aseprite/aseprite/releases/download/v1.3.18.5/Aseprite-v1.3.18.5-Source.zip",
     "changelog": "## What's New\r\n\r\n* Fixed new crash after *File > Export > Export Sprite Sheet* if there was a selection on the source sprite [#6031](https://github.com/aseprite/aseprite/issues/6031)\r\n\r\n**Full Changelog**: https://github.com/aseprite/aseprite/compare/v1.3.18.4...v1.3.18.5",
-    "build_status": "pending",
+    "build_status": "building",
     "download_url": "",
     "detected_at": "2026-09-09"
   },
